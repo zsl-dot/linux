@@ -125,6 +125,9 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
 
+#define CREATE_TRACE_POINTS
+#include "fork_trace.h"
+
 #include <kunit/visibility.h>
 
 /*
@@ -2734,6 +2737,11 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	struct task_struct *p;
 	int trace = 0;
 	pid_t nr;
+
+	/* fork 打桩实验（级 1/级 2）：trace_printk 走全局 ftrace 缓冲，无限流 */
+	trace_printk("fork: kernel_clone parent=%d(%s) flags=%#llx\n",
+		     current->pid, current->comm, (unsigned long long)clone_flags);
+	trace_fork_entry(args);
 
 	/*
 	 * Creating an empty mount namespace implies creating a new mount
